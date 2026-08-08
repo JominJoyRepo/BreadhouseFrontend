@@ -51,6 +51,13 @@
           </form>
         </mat-tab>
       </mat-tab-group>
+
+      @if (coldStartHint()) {
+        <p class="cold-start-hint">
+          <mat-icon inline>hourglass_top</mat-icon>
+          Server is starting up &mdash; this can take up to a minute. Please wait&hellip;
+        </p>
+      }
     </mat-card-content>
   </mat-card>
 </div>

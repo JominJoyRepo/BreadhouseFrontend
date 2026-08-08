@@ -1,8 +1,13 @@
 export type Role = 'store' | 'warehouse';
 
+export interface ItemInfo {
+  name: string;
+  unit: string;
+}
+
 export interface ItemCategory {
   category: string;
-  items: string[];
+  items: ItemInfo[];
 }
 
 export interface TokenResponse {
@@ -26,17 +31,34 @@ export interface RequirementSubmission {
 
 export interface SummaryRow {
   item: string;
+  unit: string;
   total: number;
+}
+
+export interface SummaryCategory {
+  category: string;
+  items: SummaryRow[];
+}
+
+export interface ReportStoreItem {
+  item: string;
+  quantity: number;
+  unit: string;
+}
+
+export interface ReportStoreCategory {
+  category: string;
+  items: ReportStoreItem[];
 }
 
 export interface ReportStore {
   storeId: string;
   storeName: string;
-  items: Record<string, number>;
+  items: ReportStoreCategory[];
 }
 
 export interface WarehouseReport {
   date: string | null;
-  summary: SummaryRow[];
+  summary: SummaryCategory[];
   stores: ReportStore[];
 }

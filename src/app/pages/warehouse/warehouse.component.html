@@ -17,15 +17,10 @@
     <div class="warehouse-content">
       <div class="filter-row">
         <mat-form-field appearance="outline" class="filter-field">
-          <mat-label>Filter by date</mat-label>
-          <mat-select [value]="selectedDate()" (selectionChange)="onDateChange($event.value)">
-            @for (date of dates(); track date) {
-              <mat-option [value]="date">{{ date }}</mat-option>
-            }
-            @if (dates().length > 1) {
-              <mat-option value="">All dates</mat-option>
-            }
-          </mat-select>
+          <mat-label>Requirements date</mat-label>
+          <mat-datepicker-toggle matIconSuffix [for]="picker" />
+          <mat-datepicker #picker />
+          <input matInput [matDatepicker]="picker" [formControl]="dateControl" />
         </mat-form-field>
         <button mat-icon-button (click)="refresh()" aria-label="Refresh" matTooltip="Refresh" class="refresh-btn">
           <mat-icon>refresh</mat-icon>
@@ -46,11 +41,11 @@
               <mat-card-title>Total requirement</mat-card-title>
               <mat-card-subtitle>
                 @if (report.date) {
-                  {{ report.date }}
+                  {{ displayDate(report.date) }}
                 } @else {
                   All dates
                 }
-                · {{ report.stores.length }} store{{ report.stores.length === 1 ? '' : 's' }} · {{ totalAll() }} pcs
+                · {{ report.stores.length }} store{{ report.stores.length === 1 ? '' : 's' }}
               </mat-card-subtitle>
             </mat-card-header>
             <mat-card-content>
@@ -60,14 +55,26 @@
                   <p>No requirements submitted for this date yet.</p>
                 </div>
               } @else {
-                <div class="summary-list">
-                  @for (row of report.summary; track row.item) {
-                    <div class="summary-row">
-                      <span class="summary-item">{{ row.item }}</span>
-                      <span class="summary-total">{{ row.total }}</span>
-                    </div>
+                <mat-accordion class="category-accordion" multi="false">
+                  @for (category of report.summary; track category.category; let first = $first) {
+                    <mat-expansion-panel [expanded]="first">
+                      <mat-expansion-panel-header>
+                        <mat-panel-title>
+                          <mat-icon class="category-icon">category</mat-icon>
+                          <span>{{ category.category }}</span>
+                        </mat-panel-title>
+                      </mat-expansion-panel-header>
+                      <div class="summary-list">
+                        @for (row of category.items; track row.item) {
+                          <div class="summary-row">
+                            <span class="summary-item">{{ row.item }}</span>
+                            <span class="summary-total">{{ row.total }} {{ row.unit }}</span>
+                          </div>
+                        }
+                      </div>
+                    </mat-expansion-panel>
                   }
-                </div>
+                </mat-accordion>
               }
             </mat-card-content>
           </mat-card>
@@ -82,17 +89,28 @@
                       <mat-icon class="store-icon">storefront</mat-icon>
                       <span>{{ store.storeName }}</span>
                     </mat-panel-title>
-                    <mat-panel-description>
-                      {{ storeTotal(store) }} pcs
-                    </mat-panel-description>
                   </mat-expansion-panel-header>
                   <div class="store-items">
-                    @for (entry of store.items | keyvalue; track entry.key) {
-                      <div class="store-item-row">
-                        <span>{{ entry.key }}</span>
-                        <span class="store-item-qty">{{ entry.value }}</span>
-                      </div>
-                    }
+                    <mat-accordion class="category-accordion" multi="false">
+                      @for (category of store.items; track category.category; let first = $first) {
+                        <mat-expansion-panel [expanded]="first">
+                          <mat-expansion-panel-header>
+                            <mat-panel-title>
+                              <mat-icon class="category-icon">category</mat-icon>
+                              <span>{{ category.category }}</span>
+                            </mat-panel-title>
+                          </mat-expansion-panel-header>
+                          <div class="store-item-list">
+                            @for (entry of category.items; track entry.item) {
+                              <div class="store-item-row">
+                                <span>{{ entry.item }}</span>
+                                <span class="store-item-qty">{{ entry.quantity }} {{ entry.unit }}</span>
+                              </div>
+                            }
+                          </div>
+                        </mat-expansion-panel>
+                      }
+                    </mat-accordion>
                   </div>
                 </mat-expansion-panel>
               }

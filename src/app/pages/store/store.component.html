@@ -21,15 +21,17 @@
             <mat-label>Requirements date</mat-label>
             <mat-datepicker-toggle matIconSuffix [for]="picker" />
             <mat-datepicker #picker />
-            <input matInput [formControl]="dateControl" [min]="todayIso()" />
+            <input matInput [matDatepicker]="picker" [formControl]="dateControl" [min]="minDate" />
           </mat-form-field>
-          <button mat-button color="primary" (click)="setToday()" class="today-btn">Today</button>
-        </div>
-        <div class="date-hint">
-          <mat-icon>info_outline</mat-icon>
-          Default is tomorrow's date
         </div>
       </div>
+
+      @if (!canSubmit()) {
+        <div class="date-lock-hint">
+          <mat-icon>lock_clock</mat-icon>
+          Requirements can only be submitted for tomorrow or later.
+        </div>
+      }
 
       @if (savedDate() === selectedDate() && savedCount() > 0) {
         <div class="saved-banner">
@@ -54,18 +56,21 @@
             </mat-expansion-panel-header>
 
             <div class="item-list">
-              @for (item of category.items; track item) {
+              @for (item of category.items; track item.name) {
                 <div class="item-row">
-                  <span class="item-name">{{ item }}</span>
+                  <span class="item-name">
+                    {{ item.name }}
+                    <span class="item-unit">{{ item.unit }}</span>
+                  </span>
                   <mat-form-field appearance="outline" class="qty-field" subscriptSizing="dynamic">
                     <mat-label>Qty</mat-label>
                     <input
                       matInput
                       type="number"
                       min="0"
-                      step="1"
-                      [formControl]="qty(item)"
-                      inputmode="numeric"
+                      [step]="qtyStep(item.unit)"
+                      [formControl]="qty(item.name)"
+                      inputmode="decimal"
                     />
                   </mat-form-field>
                 </div>
@@ -77,14 +82,14 @@
     </div>
 
     <div class="submit-bar">
-      <button mat-flat-button color="primary" class="submit-btn" (click)="submit()" [disabled]="saving()">
+      <button mat-flat-button color="primary" class="submit-btn" (click)="submit()" [disabled]="saving() || !canSubmit()">
         @if (saving()) {
           <mat-spinner diameter="22" />
           <span>Saving…</span>
         } @else {
           <ng-container>
             <mat-icon>send</mat-icon>
-            <span>Submit for {{ selectedDate() }}</span>
+            <span>Submit for {{ displayDate(selectedDate()) }}</span>
           </ng-container>
         }
       </button>

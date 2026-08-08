@@ -38,6 +38,8 @@ export class LoginComponent implements OnInit {
 
   protected readonly loading = signal(false);
   protected readonly activeRole = signal<Role>('store');
+  protected readonly coldStartHint = signal(false);
+  private coldStartTimer: ReturnType<typeof setTimeout> | undefined;
 
   protected readonly storeForm = this.fb.nonNullable.group({
     storeId: ['', Validators.required],
@@ -78,13 +80,18 @@ export class LoginComponent implements OnInit {
       role === 'store' ? (this.storeForm.value.password ?? '') : (this.warehouseForm.value.password ?? '');
 
     this.loading.set(true);
+    this.coldStartTimer = setTimeout(() => this.coldStartHint.set(true), 6000);
     this.auth.login(role, id, password).subscribe({
       next: () => {
+        clearTimeout(this.coldStartTimer);
+        this.coldStartHint.set(false);
         this.loading.set(false);
         this.snackbar.open('Logged in successfully', 'OK', { duration: 2000 });
         this.redirectByRole();
       },
       error: (err) => {
+        clearTimeout(this.coldStartTimer);
+        this.coldStartHint.set(false);
         this.loading.set(false);
         this.snackbar.open(errorMessage(err), 'OK', { duration: 4000 });
       },

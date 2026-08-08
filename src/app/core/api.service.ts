@@ -2,37 +2,35 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { ItemCategory, ItemQuantity, RequirementSubmission, WarehouseReport } from '../models';
-import { environment } from './env';
+import { AppConfigService } from './app-config.service';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly config: AppConfigService,
+  ) {}
 
   getItems() {
-    return this.http.get<ItemCategory[]>(`${environment.apiUrl}/api/items`);
+    return this.http.get<ItemCategory[]>(`${this.config.apiUrl}/api/items`);
   }
 
-  getMyRequirements() {
+  getMyRequirements(date: string) {
+    const query = date ? `?date=${encodeURIComponent(date)}` : '';
     return this.http.get<{ submissions: RequirementSubmission[] }>(
-      `${environment.apiUrl}/api/requirements/mine`,
+      `${this.config.apiUrl}/api/requirements/mine${query}`,
     );
   }
 
   submitRequirements(date: string, items: ItemQuantity[]) {
-    return this.http.post<{ ok: boolean }>(`${environment.apiUrl}/api/requirements`, {
+    return this.http.post<{ ok: boolean }>(`${this.config.apiUrl}/api/requirements`, {
       date,
       items,
     });
   }
 
-  getAvailableDates() {
-    return this.http.get<{ dates: string[] }>(
-      `${environment.apiUrl}/api/requirements/dates`,
-    );
-  }
-
-  getReport(date: string | null) {
+  getReport(date: string) {
     const query = date ? `?date=${encodeURIComponent(date)}` : '';
-    return this.http.get<WarehouseReport>(`${environment.apiUrl}/api/requirements${query}`);
+    return this.http.get<WarehouseReport>(`${this.config.apiUrl}/api/requirements${query}`);
   }
 }

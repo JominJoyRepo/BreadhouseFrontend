@@ -12,6 +12,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Subscription, forkJoin } from 'rxjs';
 
 import { ApiService } from '../../core/api.service';
+import { formatDisplayDate } from '../../core/date-format';
 import { errorMessage } from '../../core/errors';
 import { ItemCategory, ItemQuantity, RequirementSubmission } from '../../models';
 
@@ -26,6 +27,20 @@ function tomorrowIso(): string {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   return toIsoDate(tomorrow);
+}
+
+function tomorrowDate(): Date {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
+  return tomorrow;
+}
+
+function toIso(value: string | Date | null): string {
+  if (typeof value === 'string') {
+    return value;
+  }
+  return value instanceof Date ? toIsoDate(value) : tomorrowIso();
 }
 
 @Component({
@@ -51,10 +66,16 @@ export class StoreComponent implements OnInit, OnDestroy {
   protected readonly loadError = signal<string | null>(null);
   protected readonly saving = signal(false);
   protected readonly savedDate = signal<string | null>(null);
-  protected readonly dateControl = new FormControl<string>(tomorrowIso());
+  protected readonly dateControl = new FormControl<string | Date>(tomorrowIso());
 
-  protected readonly selectedDate = computed(() => this.dateControl.value ?? tomorrowIso());
-  protected readonly todayIso = computed(() => toIsoDate(new Date()));
+  private readonly dateValue = signal(tomorrowIso());
+  protected readonly selectedDate = computed(() => this.dateValue());
+  protected readonly displayDate = formatDisplayDate;
+  protected readonly minDate = tomorrowDate();
+  protected readonly canSubmit = computed(
+    () => this.selectedDate() > this.todayIso(),
+  );
+  protected readonly todayIso = () => toIsoDate(new Date());
   protected readonly itemCount = computed(() =>
     this.categories().reduce((sum, category) => sum + category.items.length, 0),
   );
@@ -65,6 +86,7 @@ export class StoreComponent implements OnInit, OnDestroy {
   private readonly controls = new Map<string, FormControl<number | null>>();
   private readonly submissions: RequirementSubmission[] = [];
   private readonly subscriptions: Subscription[] = [];
+  private mineRequestId = 0;
 
   constructor(
     private readonly api: ApiService,
@@ -73,7 +95,7 @@ export class StoreComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscriptions.push(
-      this.dateControl.valueChanges.subscribe(() => this.applyStoredQuantities()),
+      this.dateControl.valueChanges.subscribe((value) => this.onDateChange(value)),
     );
     this.loadData();
   }
@@ -90,10 +112,13 @@ export class StoreComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     this.loadError.set(null);
     this.subscriptions.push(
-      forkJoin({ items: this.api.getItems(), mine: this.api.getMyRequirements() }).subscribe({
+      forkJoin({
+        items: this.api.getItems(),
+        mine: this.api.getMyRequirements(this.selectedDate()),
+      }).subscribe({
         next: ({ items, mine }) => {
           this.categories.set(items);
-          this.submissions.push(...mine.submissions);
+          this.replaceSubmissions(mine.submissions);
           this.buildControls(items);
           this.applyStoredQuantities();
           this.loading.set(false);
@@ -106,19 +131,43 @@ export class StoreComponent implements OnInit, OnDestroy {
     );
   }
 
+  private onDateChange(value: string | Date | null): void {
+    this.dateValue.set(toIso(value));
+    const requestId = ++this.mineRequestId;
+    this.api.getMyRequirements(this.selectedDate()).subscribe({
+      next: ({ submissions }) => {
+        if (requestId !== this.mineRequestId) {
+          return;
+        }
+        this.replaceSubmissions(submissions);
+        this.applyStoredQuantities();
+      },
+      error: (err) => {
+        if (requestId !== this.mineRequestId) {
+          return;
+        }
+        this.snackbar.open(errorMessage(err), 'OK', { duration: 4000 });
+      },
+    });
+  }
+
+  private replaceSubmissions(submissions: RequirementSubmission[]): void {
+    this.submissions.splice(0, this.submissions.length, ...submissions);
+  }
+
   protected qty(item: string): FormControl<number | null> {
     return this.controls.get(item) ?? new FormControl<number | null>(0);
   }
 
   protected categoryTotal(category: ItemCategory): number {
     return category.items.reduce(
-      (sum, item) => sum + (this.controls.get(item)?.value ?? 0),
+      (sum, item) => sum + (this.controls.get(item.name)?.value ?? 0),
       0,
     );
   }
 
-  protected setToday(): void {
-    this.dateControl.setValue(this.todayIso());
+  protected qtyStep(unit: string): number {
+    return unit === 'pc' ? 1 : 0.5;
   }
 
   protected openPicker(picker: MatDatepicker<string>): void {
@@ -142,7 +191,7 @@ export class StoreComponent implements OnInit, OnDestroy {
       next: () => {
         this.saving.set(false);
         this.savedDate.set(this.selectedDate());
-        this.snackbar.open(`Requirements saved for ${this.selectedDate()}`, 'OK', {
+        this.snackbar.open(`Requirements saved for ${formatDisplayDate(this.selectedDate())}`, 'OK', {
           duration: 3000,
         });
       },
@@ -156,8 +205,8 @@ export class StoreComponent implements OnInit, OnDestroy {
   private buildControls(items: ItemCategory[]): void {
     for (const category of items) {
       for (const item of category.items) {
-        if (!this.controls.has(item)) {
-          this.controls.set(item, new FormControl<number | null>(0));
+        if (!this.controls.has(item.name)) {
+          this.controls.set(item.name, new FormControl<number | null>(0));
         }
       }
     }

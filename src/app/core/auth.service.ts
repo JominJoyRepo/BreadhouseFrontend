@@ -3,7 +3,7 @@ import { Injectable, computed, signal } from '@angular/core';
 import { tap } from 'rxjs';
 
 import { Role, TokenResponse } from '../models';
-import { environment } from './env';
+import { AppConfigService } from './app-config.service';
 
 const TOKEN_KEY = 'breadhouse_token';
 const ROLE_KEY = 'breadhouse_role';
@@ -25,13 +25,16 @@ export class AuthService {
   readonly isLoggedIn = computed(() => this.authSignal() !== null);
   readonly role = computed(() => this.authSignal()?.role ?? null);
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly config: AppConfigService,
+  ) {}
 
   login(role: Role, id: string, password: string) {
     const endpoint =
       role === 'store' ? '/api/auth/store-login' : '/api/auth/warehouse-login';
     const body = role === 'store' ? { storeId: id, password } : { warehouseId: id, password };
-    return this.http.post<TokenResponse>(environment.apiUrl + endpoint, body).pipe(
+    return this.http.post<TokenResponse>(this.config.apiUrl + endpoint, body).pipe(
       tap((res) =>
         this.persist({ token: res.token, role: res.role, name: res.name, id: res.id }),
       ),
