@@ -1,0 +1,93 @@
+<div class="store-page">
+  @if (loadError()) {
+    <div class="store-content">
+      <div class="error-card">
+        <mat-icon>cloud_off</mat-icon>
+        <p>{{ loadError() }}</p>
+        <button mat-flat-button color="primary" (click)="retryLoad()">
+          <mat-icon>refresh</mat-icon>
+          Retry
+        </button>
+      </div>
+    </div>
+  } @else if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+    <div class="loading-hint">Loading items…</div>
+  } @else {
+    <div class="store-content">
+      <div class="date-row">
+        <div class="date-field">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Requirements date</mat-label>
+            <mat-datepicker-toggle matIconSuffix [for]="picker" />
+            <mat-datepicker #picker />
+            <input matInput [formControl]="dateControl" [min]="todayIso()" />
+          </mat-form-field>
+          <button mat-button color="primary" (click)="setToday()" class="today-btn">Today</button>
+        </div>
+        <div class="date-hint">
+          <mat-icon>info_outline</mat-icon>
+          Default is tomorrow's date
+        </div>
+      </div>
+
+      @if (savedDate() === selectedDate() && savedCount() > 0) {
+        <div class="saved-banner">
+          <mat-icon>check_circle</mat-icon>
+          Already submitted: {{ savedCount() }} item{{ savedCount() === 1 ? '' : 's' }} — you can edit and resubmit.
+        </div>
+      }
+
+      <mat-accordion class="category-accordion" multi="false">
+        @for (category of categories(); track category.category) {
+          <mat-expansion-panel [expanded]="$first">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon class="category-icon">category</mat-icon>
+                <span>{{ category.category }}</span>
+              </mat-panel-title>
+              <mat-panel-description>
+                @if (categoryTotal(category) > 0) {
+                  {{ categoryTotal(category) }} pcs
+                }
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <div class="item-list">
+              @for (item of category.items; track item) {
+                <div class="item-row">
+                  <span class="item-name">{{ item }}</span>
+                  <mat-form-field appearance="outline" class="qty-field" subscriptSizing="dynamic">
+                    <mat-label>Qty</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      min="0"
+                      step="1"
+                      [formControl]="qty(item)"
+                      inputmode="numeric"
+                    />
+                  </mat-form-field>
+                </div>
+              }
+            </div>
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
+    </div>
+
+    <div class="submit-bar">
+      <button mat-flat-button color="primary" class="submit-btn" (click)="submit()" [disabled]="saving()">
+        @if (saving()) {
+          <mat-spinner diameter="22" />
+          <span>Saving…</span>
+        } @else {
+          <ng-container>
+            <mat-icon>send</mat-icon>
+            <span>Submit for {{ selectedDate() }}</span>
+          </ng-container>
+        }
+      </button>
+    </div>
+  }
+</div>

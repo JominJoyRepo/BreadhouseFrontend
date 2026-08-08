@@ -1,0 +1,56 @@
+<div class="login-screen">
+  <mat-card appearance="outlined" class="login-card">
+    <mat-card-content>
+      <div class="brand">
+        <mat-icon class="brand-icon">bakery_dining</mat-icon>
+        <h1>Breadhouse</h1>
+        <p class="tagline">Store requirements for the central warehouse</p>
+      </div>
+
+      <mat-tab-group animationDuration="200ms" (selectedIndexChange)="onTabChange($event)">
+        <mat-tab label="Store">
+          <form class="login-form" [formGroup]="storeForm" (ngSubmit)="submit()">
+            <mat-form-field appearance="outline">
+              <mat-label>Store ID</mat-label>
+              <mat-icon matPrefix>storefront</mat-icon>
+              <input matInput formControlName="storeId" placeholder="e.g. store1" autocomplete="username" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Password</mat-label>
+              <mat-icon matPrefix>lock</mat-icon>
+              <input matInput formControlName="password" type="password" autocomplete="current-password" />
+            </mat-form-field>
+            <button mat-flat-button type="submit" color="primary" [disabled]="loading()" class="submit-btn">
+              @if (loading() && activeRole() === 'store') {
+                <mat-spinner diameter="20" />
+              } @else {
+                Log in
+              }
+            </button>
+          </form>
+        </mat-tab>
+        <mat-tab label="Warehouse">
+          <form class="login-form" [formGroup]="warehouseForm" (ngSubmit)="submit()">
+            <mat-form-field appearance="outline">
+              <mat-label>Warehouse ID</mat-label>
+              <mat-icon matPrefix>warehouse</mat-icon>
+              <input matInput formControlName="warehouseId" placeholder="e.g. warehouse1" autocomplete="username" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Password</mat-label>
+              <mat-icon matPrefix>lock</mat-icon>
+              <input matInput formControlName="password" type="password" autocomplete="current-password" />
+            </mat-form-field>
+            <button mat-flat-button type="submit" color="primary" [disabled]="loading()" class="submit-btn">
+              @if (loading() && activeRole() === 'warehouse') {
+                <mat-spinner diameter="20" />
+              } @else {
+                Log in
+              }
+            </button>
+          </form>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+</div>

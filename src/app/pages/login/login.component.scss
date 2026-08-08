@@ -1,0 +1,52 @@
+.login-screen {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 32px 16px;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 8px;
+}
+
+.brand {
+  text-align: center;
+  margin: 16px 0 24px;
+}
+
+.brand-icon {
+  font-size: 56px;
+  width: 56px;
+  height: 56px;
+  color: var(--mat-sys-primary);
+}
+
+h1 {
+  margin: 8px 0 4px;
+  font-size: 28px;
+}
+
+.tagline {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 14px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 8px 8px;
+}
+
+.submit-btn {
+  min-height: 48px;
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

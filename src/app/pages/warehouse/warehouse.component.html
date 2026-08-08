@@ -1,0 +1,109 @@
+<div class="warehouse-page">
+  @if (loadError()) {
+    <div class="warehouse-content">
+      <div class="error-card">
+        <mat-icon>cloud_off</mat-icon>
+        <p>{{ loadError() }}</p>
+        <button mat-flat-button color="primary" (click)="refresh()">
+          <mat-icon>refresh</mat-icon>
+          Retry
+        </button>
+      </div>
+    </div>
+  } @else if (loading() && !report()) {
+    <mat-progress-bar mode="indeterminate" />
+    <div class="loading-hint">Loading report…</div>
+  } @else {
+    <div class="warehouse-content">
+      <div class="filter-row">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Filter by date</mat-label>
+          <mat-select [value]="selectedDate()" (selectionChange)="onDateChange($event.value)">
+            @for (date of dates(); track date) {
+              <mat-option [value]="date">{{ date }}</mat-option>
+            }
+            @if (dates().length > 1) {
+              <mat-option value="">All dates</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <button mat-icon-button (click)="refresh()" aria-label="Refresh" matTooltip="Refresh" class="refresh-btn">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+
+      @if (report() && lastUpdated()) {
+        <div class="auto-refresh-hint">
+          <mat-icon>autorenew</mat-icon>
+          Last updated {{ lastUpdated() }} · refreshes automatically
+        </div>
+      }
+
+      @if (report(); as report) {
+        <div class="report">
+          <mat-card appearance="outlined" class="summary-card">
+            <mat-card-header>
+              <mat-card-title>Total requirement</mat-card-title>
+              <mat-card-subtitle>
+                @if (report.date) {
+                  {{ report.date }}
+                } @else {
+                  All dates
+                }
+                · {{ report.stores.length }} store{{ report.stores.length === 1 ? '' : 's' }} · {{ totalAll() }} pcs
+              </mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              @if (report.summary.length === 0) {
+                <div class="empty-state">
+                  <mat-icon>event_busy</mat-icon>
+                  <p>No requirements submitted for this date yet.</p>
+                </div>
+              } @else {
+                <div class="summary-list">
+                  @for (row of report.summary; track row.item) {
+                    <div class="summary-row">
+                      <span class="summary-item">{{ row.item }}</span>
+                      <span class="summary-total">{{ row.total }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+
+          @if (report.stores.length > 0) {
+            <h2 class="section-title">Store-wise breakdown</h2>
+            <mat-accordion class="store-accordion" multi="false">
+              @for (store of report.stores; track store.storeId) {
+                <mat-expansion-panel [expanded]="$first">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      <mat-icon class="store-icon">storefront</mat-icon>
+                      <span>{{ store.storeName }}</span>
+                    </mat-panel-title>
+                    <mat-panel-description>
+                      {{ storeTotal(store) }} pcs
+                    </mat-panel-description>
+                  </mat-expansion-panel-header>
+                  <div class="store-items">
+                    @for (entry of store.items | keyvalue; track entry.key) {
+                      <div class="store-item-row">
+                        <span>{{ entry.key }}</span>
+                        <span class="store-item-qty">{{ entry.value }}</span>
+                      </div>
+                    }
+                  </div>
+                </mat-expansion-panel>
+              }
+            </mat-accordion>
+          }
+        </div>
+      }
+
+      @if (loading()) {
+        <mat-progress-bar mode="indeterminate" class="bottom-loader" />
+      }
+    </div>
+  }
+</div>

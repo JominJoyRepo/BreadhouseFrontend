@@ -1,0 +1,21 @@
+@if (auth.isLoggedIn()) {
+  <header class="app-header">
+    <div class="brand">
+      <mat-icon>bakery_dining</mat-icon>
+      <span class="brand-name">{{ title }}</span>
+    </div>
+    <div class="user-area">
+      <span class="role-chip" [class.warehouse]="auth.role() === 'warehouse'">
+        <mat-icon>{{ auth.role() === 'store' ? 'storefront' : 'warehouse' }}</mat-icon>
+        {{ auth.current()?.name }}
+      </span>
+      <button mat-icon-button (click)="logout()" aria-label="Log out">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </div>
+  </header>
+}
+
+<main class="app-content">
+  <router-outlet />
+</main>
