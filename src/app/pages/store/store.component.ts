@@ -85,6 +85,7 @@ export class StoreComponent implements OnInit, OnDestroy {
 
   private readonly controls = new Map<string, FormControl<number | null>>();
   private readonly submissions: RequirementSubmission[] = [];
+  private previous: RequirementSubmission | null = null;
   private readonly subscriptions: Subscription[] = [];
   private mineRequestId = 0;
 
@@ -118,7 +119,7 @@ export class StoreComponent implements OnInit, OnDestroy {
       }).subscribe({
         next: ({ items, mine }) => {
           this.categories.set(items);
-          this.replaceSubmissions(mine.submissions);
+          this.replaceMine(mine.submissions, mine.previous);
           this.buildControls(items);
           this.applyStoredQuantities();
           this.loading.set(false);
@@ -135,11 +136,11 @@ export class StoreComponent implements OnInit, OnDestroy {
     this.dateValue.set(toIso(value));
     const requestId = ++this.mineRequestId;
     this.api.getMyRequirements(this.selectedDate()).subscribe({
-      next: ({ submissions }) => {
+      next: ({ submissions, previous }) => {
         if (requestId !== this.mineRequestId) {
           return;
         }
-        this.replaceSubmissions(submissions);
+        this.replaceMine(submissions, previous);
         this.applyStoredQuantities();
       },
       error: (err) => {
@@ -151,8 +152,12 @@ export class StoreComponent implements OnInit, OnDestroy {
     });
   }
 
-  private replaceSubmissions(submissions: RequirementSubmission[]): void {
+  private replaceMine(
+    submissions: RequirementSubmission[],
+    previous: RequirementSubmission | null,
+  ): void {
     this.submissions.splice(0, this.submissions.length, ...submissions);
+    this.previous = previous;
   }
 
   protected qty(item: string): FormControl<number | null> {
@@ -215,6 +220,7 @@ export class StoreComponent implements OnInit, OnDestroy {
   private applyStoredQuantities(): void {
     const existing = this.submissions.find((s) => s.date === this.selectedDate());
     this.savedDate.set(existing ? existing.date : null);
+    const source = existing ?? this.previous;
     const quantities = new Map<string, number>();
     if (existing) {
       for (const entry of existing.items) {

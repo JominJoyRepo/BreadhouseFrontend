@@ -17,9 +17,10 @@ export class ApiService {
 
   getMyRequirements(date: string) {
     const query = date ? `?date=${encodeURIComponent(date)}` : '';
-    return this.http.get<{ submissions: RequirementSubmission[] }>(
-      `${this.config.apiUrl}/api/requirements/mine${query}`,
-    );
+    return this.http.get<{
+      submissions: RequirementSubmission[];
+      previous: RequirementSubmission | null;
+    }>(`${this.config.apiUrl}/api/requirements/mine${query}`);
   }
 
   submitRequirements(date: string, items: ItemQuantity[]) {
