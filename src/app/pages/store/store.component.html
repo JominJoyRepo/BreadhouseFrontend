@@ -84,13 +84,15 @@
     <div class="submit-bar">
       <button mat-flat-button color="primary" class="submit-btn" (click)="submit()" [disabled]="saving() || !canSubmit()">
         @if (saving()) {
-          <mat-spinner diameter="22" />
-          <span>Saving…</span>
+          <span class="btn-content">
+            <mat-spinner diameter="22" />
+            <span>Saving…</span>
+          </span>
         } @else {
-          <ng-container>
+          <span class="btn-content">
             <mat-icon>send</mat-icon>
             <span>Submit for {{ displayDate(selectedDate()) }}</span>
-          </ng-container>
+          </span>
         }
       </button>
     </div>

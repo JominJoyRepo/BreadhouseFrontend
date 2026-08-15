@@ -162,12 +162,19 @@
   width: 100%;
   max-width: 520px;
   min-height: 52px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   font-size: 16px;
   line-height: 1;
+
+  .btn-content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 0;
+  }
 
   mat-icon {
     font-size: 20px;
