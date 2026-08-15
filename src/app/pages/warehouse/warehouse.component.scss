@@ -96,6 +96,28 @@
     border-radius: 8px;
     margin-bottom: 8px;
   }
+
+  ::ng-deep .mat-expansion-panel-header {
+    white-space: nowrap;
+  }
+
+  ::ng-deep .mat-expansion-panel-header-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.store-accordion {
+  ::ng-deep .mat-expansion-panel-header {
+    white-space: nowrap;
+  }
+
+  ::ng-deep .mat-expansion-panel-header-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .category-icon {

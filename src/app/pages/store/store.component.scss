@@ -96,6 +96,21 @@
 .category-accordion {
   display: block;
   margin-top: 8px;
+
+  ::ng-deep .mat-expansion-panel-header {
+    white-space: nowrap;
+  }
+
+  ::ng-deep .mat-expansion-panel-header-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  ::ng-deep .mat-expansion-panel-header-description {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 }
 
 .category-icon {
