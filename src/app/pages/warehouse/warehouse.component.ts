@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,6 +9,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {
   Observable,
@@ -15,6 +18,7 @@ import {
   Subscription,
   catchError,
   filter,
+  firstValueFrom,
   fromEvent,
   merge,
   of,
@@ -59,6 +63,8 @@ function toIso(value: Date | null): string {
     MatIconModule,
     MatInputModule,
     MatProgressBarModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
     MatTooltipModule,
   ],
   templateUrl: './warehouse.component.html',
@@ -74,11 +80,15 @@ export class WarehouseComponent implements OnInit, OnDestroy {
   protected readonly loading = signal(true);
   protected readonly loadError = signal<string | null>(null);
   protected readonly lastUpdated = signal<string | null>(null);
+  protected readonly exporting = signal(false);
 
   private readonly refresh$ = new Subject<void>();
   private refreshSubscription: Subscription | null = null;
 
-  constructor(private readonly api: ApiService) {}
+  constructor(
+    private readonly api: ApiService,
+    private readonly snackbar: MatSnackBar,
+  ) {}
 
   ngOnInit(): void {
     this.refreshSubscription = this.buildRefreshStream().subscribe();
@@ -94,6 +104,45 @@ export class WarehouseComponent implements OnInit, OnDestroy {
 
   protected openPicker(picker: MatDatepicker<Date>): void {
     picker.open();
+  }
+
+  protected async downloadReport(): Promise<void> {
+    if (this.exporting()) {
+      return;
+    }
+    const date = this.selectedDate();
+    this.exporting.set(true);
+    try {
+      const blob = await firstValueFrom(this.api.exportReport(date));
+      if (!blob) {
+        throw new Error('Empty response');
+      }
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = date ? `requirements_${date}.xlsx` : 'requirements_all-dates.xlsx';
+      anchor.click();
+      URL.revokeObjectURL(url);
+      this.snackbar.open('Report downloaded', 'OK', { duration: 2500 });
+    } catch (err) {
+      this.snackbar.open(await this.exportErrorMessage(err), 'OK', { duration: 4000 });
+    } finally {
+      this.exporting.set(false);
+    }
+  }
+
+  private async exportErrorMessage(err: unknown): Promise<string> {
+    if (err instanceof HttpErrorResponse && err.error instanceof Blob) {
+      try {
+        const body = JSON.parse(await err.error.text()) as { detail?: string };
+        if (body?.detail) {
+          return body.detail;
+        }
+      } catch {
+        // fall through to the generic message
+      }
+    }
+    return errorMessage(err);
   }
 
   /** Polls on an interval, on tab focus, on date change and on manual refresh. */

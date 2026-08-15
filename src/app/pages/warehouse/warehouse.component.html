@@ -22,6 +22,23 @@
           <mat-datepicker #picker />
           <input matInput [matDatepicker]="picker" [formControl]="dateControl" />
         </mat-form-field>
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="downloadReport()"
+          [disabled]="exporting()"
+          class="export-btn"
+          matTooltip="Download Excel report"
+        >
+          <span class="btn-content">
+            @if (exporting()) {
+              <mat-spinner diameter="18" />
+            } @else {
+              <mat-icon>download</mat-icon>
+            }
+            Excel
+          </span>
+        </button>
         <button mat-icon-button (click)="refresh()" aria-label="Refresh" matTooltip="Refresh" class="refresh-btn">
           <mat-icon>refresh</mat-icon>
         </button>

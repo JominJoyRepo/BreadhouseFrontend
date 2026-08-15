@@ -34,4 +34,11 @@ export class ApiService {
     const query = date ? `?date=${encodeURIComponent(date)}` : '';
     return this.http.get<WarehouseReport>(`${this.config.apiUrl}/api/requirements${query}`);
   }
+
+  exportReport(date: string) {
+    const query = date ? `?date=${encodeURIComponent(date)}` : '';
+    return this.http.get(`${this.config.apiUrl}/api/requirements/export${query}`, {
+      responseType: 'blob',
+    });
+  }
 }
