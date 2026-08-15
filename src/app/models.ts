@@ -3,6 +3,7 @@ export type Role = 'store' | 'warehouse';
 export interface ItemInfo {
   name: string;
   unit: string;
+  sku: string;
 }
 
 export interface ItemCategory {
@@ -33,6 +34,7 @@ export interface SummaryRow {
   item: string;
   unit: string;
   total: number;
+  sku?: string;
 }
 
 export interface SummaryCategory {
@@ -44,6 +46,7 @@ export interface ReportStoreItem {
   item: string;
   quantity: number;
   unit: string;
+  sku?: string;
 }
 
 export interface ReportStoreCategory {

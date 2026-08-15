@@ -67,7 +67,10 @@
                       <div class="summary-list">
                         @for (row of category.items; track row.item) {
                           <div class="summary-row">
-                            <span class="summary-item">{{ row.item }}</span>
+                            <span class="summary-name">
+                              {{ row.item }}
+                              <span class="summary-sku">{{ row.sku }}</span>
+                            </span>
                             <span class="summary-total">{{ row.total }} {{ row.unit }}</span>
                           </div>
                         }
@@ -103,7 +106,10 @@
                           <div class="store-item-list">
                             @for (entry of category.items; track entry.item) {
                               <div class="store-item-row">
-                                <span>{{ entry.item }}</span>
+                                <span class="store-item-name">
+                                  {{ entry.item }}
+                                  <span class="store-item-sku">{{ entry.sku }}</span>
+                                </span>
                                 <span class="store-item-qty">{{ entry.quantity }} {{ entry.unit }}</span>
                               </div>
                             }
