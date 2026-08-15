@@ -56,8 +56,8 @@
                 </div>
               } @else {
                 <mat-accordion class="category-accordion" multi="false">
-                  @for (category of report.summary; track category.category; let first = $first) {
-                    <mat-expansion-panel [expanded]="first">
+                  @for (category of report.summary; track category.category) {
+                    <mat-expansion-panel>
                       <mat-expansion-panel-header>
                         <mat-panel-title>
                           <mat-icon class="category-icon">category</mat-icon>
@@ -83,7 +83,7 @@
             <h2 class="section-title">Store-wise breakdown</h2>
             <mat-accordion class="store-accordion" multi="false">
               @for (store of report.stores; track store.storeId) {
-                <mat-expansion-panel [expanded]="$first">
+                <mat-expansion-panel>
                   <mat-expansion-panel-header>
                     <mat-panel-title>
                       <mat-icon class="store-icon">storefront</mat-icon>
@@ -92,8 +92,8 @@
                   </mat-expansion-panel-header>
                   <div class="store-items">
                     <mat-accordion class="category-accordion" multi="false">
-                      @for (category of store.items; track category.category; let first = $first) {
-                        <mat-expansion-panel [expanded]="first">
+                      @for (category of store.items; track category.category) {
+                        <mat-expansion-panel>
                           <mat-expansion-panel-header>
                             <mat-panel-title>
                               <mat-icon class="category-icon">category</mat-icon>
