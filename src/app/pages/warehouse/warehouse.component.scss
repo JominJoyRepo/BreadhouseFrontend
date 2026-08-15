@@ -103,8 +103,7 @@
 
   ::ng-deep .mat-expansion-panel-header-title {
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    min-width: 0;
   }
 }
 
@@ -115,13 +114,21 @@
 
   ::ng-deep .mat-expansion-panel-header-title {
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    min-width: 0;
   }
+}
+
+.category-name,
+.store-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .category-icon {
   margin-right: 8px;
+  flex: 0 0 auto;
   color: var(--mat-sys-primary);
   font-size: 20px;
   width: 20px;
@@ -180,6 +187,7 @@
 
 .store-icon {
   margin-right: 8px;
+  flex: 0 0 auto;
   color: var(--mat-sys-primary);
   font-size: 20px;
   width: 20px;
