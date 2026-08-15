@@ -222,8 +222,8 @@ export class StoreComponent implements OnInit, OnDestroy {
     this.savedDate.set(existing ? existing.date : null);
     const source = existing ?? this.previous;
     const quantities = new Map<string, number>();
-    if (existing) {
-      for (const entry of existing.items) {
+    if (source) {
+      for (const entry of source.items) {
         quantities.set(entry.item, entry.quantity);
       }
     }
