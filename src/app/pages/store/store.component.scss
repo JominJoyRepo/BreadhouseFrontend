@@ -108,7 +108,7 @@
 
   ::ng-deep .mat-expansion-panel-header-description {
     white-space: nowrap;
-    flex-shrink: 0;
+    flex: 0 0 auto;
   }
 }
 
